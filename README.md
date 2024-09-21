@@ -9,6 +9,7 @@
     -  Cualquier directorio.
 - Para habilitar las opciones el programa debe detectar el archivo `AGA - LIM_POB_PARR_BARR 07-2024.xlsx`.
 
+
 # Instruccions for developers
 
 ## Notes
