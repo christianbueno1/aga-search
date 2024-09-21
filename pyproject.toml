@@ -6,7 +6,8 @@ authors = ["Christian Bueno <chmabuen@espol.edu.ec>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+# python = "^3.12"
+python = ">=3.8,<3.14"
 customtkinter = "^5.2.2"
 pandas = "^2.2.3"
 unidecode = "^1.3.8"
