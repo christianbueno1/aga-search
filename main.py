@@ -1,5 +1,3 @@
-# main.py
-
 from aga_search.gui import ExcelApp
 
 def main():

@@ -1,7 +1,10 @@
 import customtkinter as ctk
 from tkinter import filedialog, messagebox
 import os
-from aga_search.config import DOWNLOAD_PATH
+from aga_search.config import DOWNLOADS_PATH, DB_FILE_PATH, COLUMN1, COLUMN2, COLUMN3, NEW_COLUMNS_NAME, SHEET_INDEX, SHEET_NAME, FILE_COLUMNS, COLUMN_INDEX
+import time
+from aga_search.read_spreadsheet import read_file, insert_column_in_excel, create_new_excel_file
+import pandas as pd
 
 # Initialize customtkinter
 ctk.set_appearance_mode("System")  # Modes: "System" (default), "Dark", "Light"
@@ -76,19 +79,42 @@ class ExcelApp(ctk.CTk):
         # Configure grid for frame_actions
         frame_actions.grid_columnconfigure(0, weight=1)
         frame_actions.grid_columnconfigure(1, weight=1)
+        frame_actions.grid_columnconfigure(2, weight=1)
 
+        # Checkbox to set Downloads as default save directory
+        self.use_downloads_var = ctk.BooleanVar(value=True)  # Default checked
+        self.checkbox_downloads = ctk.CTkCheckBox(
+            frame_actions,
+            text="Save to Downloads Directory",
+            variable=self.use_downloads_var
+        )
+        self.checkbox_downloads.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+
+        # Progress bar for file processing
+        self.progress_bar = ctk.CTkProgressBar(frame_actions)
+        self.progress_bar.grid(row=1, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
+        self.progress_bar.set(0)  # Initialize progress bar to 0
+        
         # Button to process the selected files
         self.button_process = ctk.CTkButton(frame_actions, text="Process", command=self.process_files, state="disabled")
-        self.button_process.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
+        self.button_process.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
 
         # Button to close the window
         self.button_close = ctk.CTkButton(frame_actions, text="Close", command=self.close_window)
-        self.button_close.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
+        self.button_close.grid(row=0, column=2, padx=10, pady=10, sticky="ew")
+
+        self.check_if_db_exists()
+
+    def check_if_db_exists(self):
+        # Check if the database file exists
+        if os.path.exists(DB_FILE_PATH):
+            self.label_db.configure(text=DB_FILE_PATH)
+            self.button_upload.configure(state="normal")
 
     def select_db_file(self):
         # Open a file dialog to select the file
         file_path = filedialog.askopenfilename(
-            initialdir=DOWNLOAD_PATH,
+            initialdir=DOWNLOADS_PATH,
             title="Select the Database Excel File",
             filetypes=[("Excel files", "*.xlsx *.xls")]
         )
@@ -101,6 +127,7 @@ class ExcelApp(ctk.CTk):
     def select_upload_file(self):
         # Open a file dialog to select the file
         file_path = filedialog.askopenfilename(
+            initialdir=DOWNLOADS_PATH,
             title="Select the Excel File to Upload",
             filetypes=[("Excel files", "*.xlsx *.xls")]
         )
@@ -121,25 +148,49 @@ class ExcelApp(ctk.CTk):
             messagebox.showerror("Error", "Please select both the database and upload files.")
         else:
             try:
-                # # Import the file_processor here to avoid circular imports
-                # from aga_search.file_processor import process_excel_files
+                # Update progress bar to 0
+                self.progress_bar.set(0)
+                self.update_idletasks()
 
-                # # Process the files
-                # processed_df = process_excel_files(db_file, upload_file)
+                # remove to upload_file the extension xlsx
+                upload_file_cp = upload_file.replace('.xlsx', '')
+                # default new file name
+                new_file_name = f"{upload_file_cp}-{time.strftime('%Y-%m-%d-%H-%M-%S')}.xlsx"
+                # Process the files
+               # crteate the new columns data
+                new_columns_data = read_file(file_path=upload_file, sheet_name=SHEET_INDEX, columns=FILE_COLUMNS, new_columns_name=NEW_COLUMNS_NAME, progress_bar=self.progress_bar)
+                self.progress_bar.set(0.85)
+                self.update_idletasks()
+                # time.sleep(0.1)
 
-                # # Ask user where to save or use default
-                # save_dir = filedialog.askdirectory(title="Select Save Directory")
-                # if not save_dir:
-                #     save_dir = DOWNLOAD_PATH  # Use default download path
-
-                # # Import the file_manager here to avoid circular imports
-                # from aga_search.file_manager import save_file
-
-                # # Save the processed DataFrame
-                # save_file(processed_df, save_dir)
-
-                # messagebox.showinfo("Success", f"The files have been processed and saved to {save_dir}")
-                print("Files processed successfully!")
+                # insert the new columns in the excel file
+                df: pd.DataFrame =  insert_column_in_excel(upload_file, sheet_name=SHEET_INDEX, col_index=COLUMN_INDEX, new_columns_data=new_columns_data)
+                # print(f"df: {df[NEW_COLUMNS_NAME]}")
+                self.progress_bar.set(0.90)
+                self.update_idletasks()
+                # time.sleep(0.1)
+                
+                # Determine save directory based on checkbox
+                if self.use_downloads_var.get():
+                    save_dir = DOWNLOADS_PATH  # Use Downloads directory
+                else:
+                    save_dir = filedialog.askdirectory(
+                        title="Select Save Directory",
+                        initialdir=DOWNLOADS_PATH  # Optional: Set Downloads as the initial directory
+                    )
+                    if not save_dir:
+                        messagebox.showwarning("Save Directory", "No directory selected. Using Downloads directory.")
+                        save_dir = DOWNLOADS_PATH
+                new_file_name_path = os.path.join(save_dir, new_file_name)
+                
+                # Create a new excel file from the DataFrame
+                create_new_excel_file(df, new_file_name=new_file_name_path,sheet_name=SHEET_NAME)
+                self.progress_bar.set(1)
+                self.update_idletasks()
+                # time.sleep(0.1)
+                # Show success message
+                messagebox.showinfo("Success", f"New file created: {new_file_name_path}")
+            
             except Exception as e:
                 messagebox.showerror("Processing Error", f"An error occurred while processing the files:\n{e}")
 
@@ -153,3 +204,4 @@ class ExcelApp(ctk.CTk):
 if __name__ == "__main__":
     app = ExcelApp()
     app.run()
+
