@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from tkinter import filedialog, messagebox
 import os
-from aga_search.config import DOWNLOADS_PATH, DB_FILE_PATH, COLUMN1, COLUMN2, COLUMN3, NEW_COLUMNS_NAME, SHEET_INDEX, SHEET_NAME, FILE_COLUMNS, COLUMN_INDEX
+from aga_search.config import DOWNLOADS_PATH, HOME_PATH, DB_FILE_PATH, COLUMN1, COLUMN2, COLUMN3, NEW_COLUMNS_NAME, SHEET_INDEX, SHEET_NAME, FILE_COLUMNS, COLUMN_INDEX
 import time
 from aga_search.read_spreadsheet import read_file, insert_column_in_excel, create_new_excel_file
 import pandas as pd
@@ -85,20 +85,27 @@ class ExcelApp(ctk.CTk):
         frame_actions.grid_columnconfigure(0, weight=1)
         frame_actions.grid_columnconfigure(1, weight=1)
         frame_actions.grid_columnconfigure(2, weight=1)
-        frame_actions.grid_columnconfigure(3, weight=1)
 
         # Checkbox to set Downloads as default save directory
         self.use_downloads_var = ctk.BooleanVar(value=True)  # Default checked
         self.checkbox_downloads = ctk.CTkCheckBox(
             frame_actions,
             text="Save to Downloads Directory",
-            variable=self.use_downloads_var
+            variable=self.use_downloads_var,
+            command=lambda: self.button_save_dir.configure(state="disabled" if self.use_downloads_var.get() else "normal")
         )
         self.checkbox_downloads.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
+        # Label to show the save directory path
+        self.label_save_dir = ctk.CTkLabel(frame_actions, text="Or select a directory")
+        self.label_save_dir.grid(row=1, column=0, padx=10, pady=10, sticky="w")
+        # button to select the save directory
+        self.button_save_dir = ctk.CTkButton(frame_actions, text="Select Directory", command=self.select_save_dir, state="disabled")
+        self.button_save_dir.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
+
         # Progress bar for file processing
         self.progress_bar = ctk.CTkProgressBar(frame_actions)
-        self.progress_bar.grid(row=1, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
+        self.progress_bar.grid(row=3, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
         self.progress_bar.set(0)  # Initialize progress bar to 0
         
         # Button to process the selected files
@@ -165,6 +172,17 @@ class ExcelApp(ctk.CTk):
             self.label_upload.configure(text=file_path)
             # Enable the process button
             self.button_process.configure(state="normal")
+    
+    def select_save_dir(self):
+        # Open a file dialog to select the directory
+        save_dir = filedialog.askdirectory(
+            title="Select Save Directory",
+            initialdir=HOME_PATH  # Optional: Set Downloads as the initial directory
+        )
+        # If the directory is selected, show the path in the label
+        if save_dir:
+            self.label_save_dir.configure(text=save_dir)
+
 
     def process_files(self):
         # Get the paths of the selected files
@@ -181,8 +199,11 @@ class ExcelApp(ctk.CTk):
                 self.progress_bar.set(0)
                 self.update_idletasks()
 
-                # remove to upload_file the extension xlsx
-                upload_file_cp = upload_file.replace('.xlsx', '')
+                # get from the path of upload_file variable the file name
+                upload_file_cp = os.path.basename(upload_file)
+                print(f"Upload File: {upload_file_cp}")
+                # remove the extension of the file
+                upload_file_cp = upload_file_cp.replace('.xlsx', '')
                 # default new file name
                 new_file_name = f"{upload_file_cp}-{time.strftime('%Y-%m-%d-%H-%M-%S')}.xlsx"
                 # Process the files
@@ -202,6 +223,8 @@ class ExcelApp(ctk.CTk):
                 # Determine save directory based on checkbox
                 if self.use_downloads_var.get():
                     save_dir = DOWNLOADS_PATH  # Use Downloads directory
+                elif self.label_save_dir.cget("text") != "Or select a directory":
+                    save_dir = self.label_save_dir.cget("text")
                 else:
                     save_dir = filedialog.askdirectory(
                         title="Select Save Directory",
@@ -210,7 +233,10 @@ class ExcelApp(ctk.CTk):
                     if not save_dir:
                         messagebox.showwarning("Save Directory", "No directory selected. Using Downloads directory.")
                         save_dir = DOWNLOADS_PATH
+                print(f"Save Directory: {save_dir}")
+                print(f"New File Name: {new_file_name}")
                 new_file_name_path = os.path.join(save_dir, new_file_name)
+                print(f"New Path of File: {new_file_name_path}")
                 
                 # Create a new excel file from the DataFrame
                 create_new_excel_file(df, new_file_name=new_file_name_path,sheet_name=SHEET_NAME)

@@ -3,6 +3,8 @@ import time
 
 # downloads path for any operating system
 DOWNLOADS_PATH = os.path.expanduser("~/Downloads")
+# Home path
+HOME_PATH = os.path.expanduser("~")
 
 # patterns
 DB_FILE_NAME = 'AGA - LIM_POB_PARR_BARR 07-2024.xlsx'
