@@ -1,4 +1,4 @@
-# Instrucciones para el uso
+# Instrucciones para el uso de la aplicacion
 - El archivo base de datos es el archivo que contiene toda la informacion sobre los AGA.
     - **AGA - LIM_POB_PARR_BARR 07-2024.xlsx**
     - La aplicacion lo detecta automaticamente cuando lo guarda en el directorio Descargas de su sistema.
