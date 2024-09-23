@@ -13,10 +13,13 @@ ctk.set_default_color_theme("blue")  # Themes: "blue" (default), "dark-blue", "g
 class ExcelApp(ctk.CTk):
     def __init__(self):
         super().__init__()
-
+        # width and height of the window
+        width = 800
+        height = 600
+            
         # Set window title and minimum size
         self.title("Excel File Selector")
-        self.minsize(700, 400)  # Set minimum width and height
+        self.minsize(width, height)  # Set minimum width and height
 
         # Make the window responsive by configuring grid rows and columns
         self.grid_rowconfigure(0, weight=1)
@@ -158,7 +161,7 @@ class ExcelApp(ctk.CTk):
                 new_file_name = f"{upload_file_cp}-{time.strftime('%Y-%m-%d-%H-%M-%S')}.xlsx"
                 # Process the files
                # crteate the new columns data
-                new_columns_data = read_file(file_path=upload_file, sheet_name=SHEET_INDEX, columns=FILE_COLUMNS, new_columns_name=NEW_COLUMNS_NAME, progress_bar=self.progress_bar)
+                new_columns_data, positive_new_values_inserted_count, rows_count = read_file(file_path=upload_file, sheet_name=SHEET_INDEX, columns=FILE_COLUMNS, new_columns_name=NEW_COLUMNS_NAME, progress_bar=self.progress_bar)
                 self.progress_bar.set(0.85)
                 self.update_idletasks()
                 # time.sleep(0.1)

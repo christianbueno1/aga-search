@@ -20,12 +20,12 @@ def read_file(file_path=FILE_PATH, sheet_name=SHEET_INDEX, columns=[COLUMN1, COL
     new_columns_data: list, data to insert
     """
     new_columns_data = []
-    positive_new_value_inserted_count = 0
+    positive_new_values_inserted_count = 0
     
     # sheet_name or sheet_index
     df = pd.read_excel(file_path, sheet_name=sheet_name, engine='openpyxl')
     # count of rows
-    row_count = df.shape[0]
+    rows_count = df.shape[0]
     if columns:
         # store in existing_col_index the index of the first value in columns
         existing_col_index = df.columns.get_loc(columns[0])
@@ -51,7 +51,7 @@ def read_file(file_path=FILE_PATH, sheet_name=SHEET_INDEX, columns=[COLUMN1, COL
             # ask to type enter
             # input("Press Enter to continue...*")
             if sheet_name_founded is not None:
-                positive_new_value_inserted_count += 1
+                positive_new_values_inserted_count += 1
                 if sheet_name_founded:
                     break
             else:
@@ -66,17 +66,17 @@ def read_file(file_path=FILE_PATH, sheet_name=SHEET_INDEX, columns=[COLUMN1, COL
 
         # update the progress bar
         if progress_bar:
-            progress = (index + 1) / row_count
+            progress = (index + 1) / rows_count
             progress_bar.set(progress * 0.75)
             progress_bar.update_idletasks()
 
     print(f"len of new_columns_data: {len(new_columns_data)}")
-    print(f"Count of new data: {positive_new_value_inserted_count}")    
-    print(f"the number of rows excluding the header or column names: {row_count}")
+    print(f"Count of new data: {positive_new_values_inserted_count}")    
+    print(f"the number of rows excluding the header or column names: {rows_count}")
     # ask to type enter
     # input("Press Enter to continue...*")
 
-    return new_columns_data
+    return new_columns_data, positive_new_values_inserted_count, rows_count
 
 # function to insert columns new_columns_data in a excel file, but create a new file
 def insert_column_in_excel(file_path, sheet_name, col_index, new_columns_data) -> pd.DataFrame:
