@@ -33,6 +33,7 @@ class ExcelApp(ctk.CTk):
         main_frame.grid_rowconfigure(0, weight=1)
         main_frame.grid_rowconfigure(1, weight=1)
         main_frame.grid_rowconfigure(2, weight=1)
+        main_frame.grid_rowconfigure(3, weight=1)
         main_frame.grid_columnconfigure(0, weight=1)
 
         # Frame for the database file selection
@@ -80,9 +81,11 @@ class ExcelApp(ctk.CTk):
         frame_actions.grid(row=2, column=0, sticky="nsew", padx=10, pady=(10, 10))
 
         # Configure grid for frame_actions
+        frame_actions.grid_rowconfigure(0, weight=1)
         frame_actions.grid_columnconfigure(0, weight=1)
         frame_actions.grid_columnconfigure(1, weight=1)
         frame_actions.grid_columnconfigure(2, weight=1)
+        frame_actions.grid_columnconfigure(3, weight=1)
 
         # Checkbox to set Downloads as default save directory
         self.use_downloads_var = ctk.BooleanVar(value=True)  # Default checked
@@ -106,7 +109,30 @@ class ExcelApp(ctk.CTk):
         self.button_close = ctk.CTkButton(frame_actions, text="Close", command=self.close_window)
         self.button_close.grid(row=0, column=2, padx=10, pady=10, sticky="ew")
 
+        # new frame for textbox_output
+        frame_textbox_output = ctk.CTkFrame(main_frame, fg_color="gray85")
+        frame_textbox_output.grid(row=3, column=0, sticky="nsew", padx=10, pady=(10, 10))
+
+        # CTkTextbox to display positive_new_values_inserted_count and rows_count
+        self.textbox_output = ctk.CTkTextbox(
+            frame_textbox_output, 
+            width=400, 
+            height=100,
+            state="disabled",
+            fg_color="white",
+            corner_radius=5
+        )
+        self.textbox_output.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
+
         self.check_if_db_exists()
+    
+    # function to insert the values in the textbox_output
+    def insert_values_in_textbox_output(self, positive_new_values_inserted_count, rows_count):
+        self.textbox_output.configure(state="normal")
+        self.textbox_output.delete("1.0", "end")
+        self.textbox_output.insert("end", f"Positive New Values Inserted Count: {positive_new_values_inserted_count}\n")
+        self.textbox_output.insert("end", f"Rows Count: {rows_count}\n")
+        self.textbox_output.configure(state="disabled")
 
     def check_if_db_exists(self):
         # Check if the database file exists
@@ -193,6 +219,9 @@ class ExcelApp(ctk.CTk):
                 # time.sleep(0.1)
                 # Show success message
                 messagebox.showinfo("Success", f"New file created: {new_file_name_path}")
+
+                # insert the values in the textbox_output
+                self.insert_values_in_textbox_output(positive_new_values_inserted_count, rows_count)
             
             except Exception as e:
                 messagebox.showerror("Processing Error", f"An error occurred while processing the files:\n{e}")
