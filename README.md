@@ -1,13 +1,13 @@
 # Instrucciones para el uso
-
+- El archivo base de datos es el archivo que contiene toda la informacion sobre los AGA.
+    - **AGA - LIM_POB_PARR_BARR 07-2024.xlsx**
+    - La aplicacion lo detecta automaticamente cuando lo guarda en el directorio Descargas de su sistema.
 - El archivo que desea procesar debe tener las siguientes cabezeras.
     - 'Ingresa el Barrio en que vives'
     - 'Ingresa tu dirección y una referencia'
     - 'Ingresa la Parroquia a la que pertenece tu Sector'
-- El archivo que se usara como base de datos `AGA - LIM_POB_PARR_BARR 07-2024.xlsx` puede guardarlo en.
-    - El directorio Desacargas o Downloads y el programa lo detectara automaticamente. (Recomendado)
-    -  Cualquier directorio.
-- Para habilitar las opciones el programa debe detectar el archivo `AGA - LIM_POB_PARR_BARR 07-2024.xlsx`.
+- Debe subir estos dos archivos para habilitar el boton de procesamiento.
+
 
 
 # Instruccions for developers
