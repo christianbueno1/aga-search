@@ -24,6 +24,6 @@ poetry add pyinstaller -G dev
 #pyinstaller --name ExcelApp --onefile --windowed aga_search/gui.py
 
 # create the executable in /dist
-poetry run pyinstaller --name ExcelApp --onefile --windowed main.py
+poetry run pyinstaller --name SearchAgaApp --onefile --windowed main.py
 
 ```
